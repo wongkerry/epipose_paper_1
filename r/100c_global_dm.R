@@ -91,5 +91,7 @@ pdt[, (symp) := lapply(.SD, function(x){x[is.na(x)] <- 0; x}), .SDcols = symp]
 pdt[, part_symp_any := rowSums(.SD), .SDcols = symp]
 pdt[, part_symp_any := fifelse(part_symp_any==0,0,1)]
 
+pdt[, dayweight := fifelse(weekday %in% c("Sunday", "Saturday"), 2/7, 5/7)]
+
 
 qs::qsave(pdt, "data/dt_all_weighted_dmed.qs")

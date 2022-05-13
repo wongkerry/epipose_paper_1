@@ -6,7 +6,6 @@ library(lubridate)
 library(tsibble)
 library(ggplot2)
 library(extrafont)
-library
 
 options("digits" = 3)
 loadfonts()
@@ -14,7 +13,6 @@ windowsFonts(`Segoe UI` = windowsFont('Segoe UI'))
 
 source('r/functions/map_country_group.R')
 source('r/functions/color_drsimonj.R')
-
 
 pdt <- qs::qread("data/dt_all_weighted_dmed.qs")
 pdt[, group := map_country_group[country]]
