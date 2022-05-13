@@ -32,6 +32,7 @@ sum(duplicated(pt$part_wave_uid)) #confirm no duplicated survey responses
     pt[part_symp_fatigue==1, part_symp_tired := 1]
     
   risk <- grep("risk", names(pt), value = TRUE)
+  risk <- grep("hhm", risk, value = TRUE, inv = TRUE)
   pt <- cbind(pt[, .(country, panel, wave, survey_round, date, weekday, part_id, part_wave_uid, sample_type,
                      part_age_group, part_gender, 
                      part_att_spread, part_att_likely, part_att_serious,
@@ -53,11 +54,8 @@ hh <- rbind(hh1, hh2, hh3, fill = TRUE)
   
   #select only the required variables
   hh <- hh[, .(part_wave_uid, hh_size, hhm_age, hhm_age_group)]
-  hh <- hh[, old := fifelse(hhm_age_group %in% c("65-69", "70-74", "75-79", "80-84", "85+"),
-                            1,0)]
-  hh <- hh[, .(hh_size = mean(hh_size), 
-               old = max(old)), 
-           by = part_wave_uid]
+  hh <- hh[, old := fifelse(hhm_age_group %in% c("65-69", "70-74", "75-79", "80-84", "85+"),1,0)]
+  hh <- hh[, .(hh_size = mean(hh_size), old = max(old)), by = part_wave_uid]
   
 pt <- merge(pt, hh, by = "part_wave_uid", all.x = TRUE)
   

@@ -23,6 +23,10 @@ map_country_name <- c(
 )
 
 map_country_group <- c(
+  "uk" = "G0",
+  "be" = "G0",
+  "de" = "G0",
+  "nl" = "G0",
   "at" = "G1",
   "ch" = "G2",
   "dk" = "G1",
@@ -39,9 +43,31 @@ map_country_group <- c(
   "pl" = "G1",
   "pt" = "G1",
   "si" = "G2",
-  "sk" = "G3",
+  "sk" = "G3"
+)
+
+
+map_country_g0g123 <- c(
   "uk" = "G0",
   "be" = "G0",
   "de" = "G0",
-  "nl" = "G0"
+  "nl" = "G0",
+  "at" = "G123",
+  "ch" = "G123",
+  "dk" = "G123",
+  "ee" = "G123",
+  "es" = "G123",
+  "fi" = "G123",
+  "fr" = "G123",
+  "gr" = "G123",
+  "hr" = "G123",
+  "hu" = "G123",
+  "it" = "G123",
+  "lt" = "G123",
+  "mt" = "G123",
+  "pl" = "G123",
+  "pt" = "G123",
+  "si" = "G123",
+  "sk" = "G123"
 )
+

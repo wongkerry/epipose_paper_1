@@ -93,7 +93,7 @@ nl <- qs::qread("data/dt_nl.qs")
 uk <- qs::qread("data/dt_uk.qs")
 g123 <- qs::qread("data/dt_g123.qs")
 
-pdt <- rbind(be, nl, uk, g123, fill = TRUE)
+pdt <- rbind(be, nl, de, uk, g123, fill = TRUE)
 pdt[, start_date := min(date), by = .(country, survey_round)]
 pdt[, end_date := max(date), by = .(country, survey_round)]
 pdt[, mid_date := start_date + floor((end_date - start_date)/2) , by = .(country, survey_round)]

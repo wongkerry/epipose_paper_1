@@ -36,12 +36,21 @@ sum(duplicated(pt$part_wave_uid)) #confirm no duplicated survey responses
   hhm_age <- grep("hhm_age", names(pt), value = TRUE)
   pt[, hh_size := rowSums(!is.na(.SD)), .SDcols=hhm_age]
   pt[, hh_size := hh_size + 1]
-  pt[, old := hhm_age_1 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
-  pt[, old := hhm_age_2 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
-  pt[, old := hhm_age_3 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
-  pt[, old := hhm_age_4 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
-  pt[, old := hhm_age_5 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
-  pt[, old := hhm_age_6 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
+  pt[, old := NA]
+  pt[is.na(old), old := hhm_age_1 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
+  pt[is.na(old), old := hhm_age_2 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
+  pt[is.na(old), old := hhm_age_3 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
+  pt[is.na(old), old := hhm_age_4 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
+  pt[is.na(old), old := hhm_age_5 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
+  pt[is.na(old), old := hhm_age_6 %in% c("65-69", "70-74", "75-79", "80-84", "85 years or older", "85+")]
+  pt[, old := as.numeric(old)]
+  
+  n_cnt <- grep("n_cnt", names(pt), value = TRUE)
+  pt[, (n_cnt):=lapply(.SD, function(i){i[is.na(i)] <- 0; i}), .SDcols = n_cnt]
+  pt[, cnt := n_cnt]
+  pt[, cnt_home := n_cnt_home]
+  pt[, cnt_work := n_cnt_work]
+  pt[, cnt_others := n_cnt - n_cnt_home - n_cnt_work]
   
   pt <- cbind(pt[, .(country, panel, wave, survey_round, date, weekday, part_id, part_wave_uid, sample_type,
                      part_age_group, part_gender, 
@@ -49,7 +58,8 @@ sum(duplicated(pt$part_wave_uid)) #confirm no duplicated survey responses
                      part_att_spread, part_att_likely, part_att_serious,
                      part_attend_work_week, part_attend_work_yesterday, part_limit_work_atleast_day,
                      part_face_mask,
-                     part_vacc
+                     part_vacc, 
+                     cnt, cnt_home, cnt_work, cnt_others
   )],
   pt[, ..symp],
   pt[, ..risk])
