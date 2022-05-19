@@ -7,4 +7,5 @@ source('r/100_load_de.R')
 source('r/100_load_nl.R')
 
 source('r/100b_add_pop_weights.R')
-source('r/100c_global_dm.R')
+source('r/100c_add_oxcgrt.R')
+source('r/100d_global_dm.R')

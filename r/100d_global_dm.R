@@ -8,7 +8,7 @@ source('r/functions/map_country_group.R')
 
 options("digits" = 3)
 
-pdt <- qs::qread("data/dt_all_weighted.qs")
+pdt <- qs::qread("data/dt_all_100c.qs")
 
 #create all variable
 pdt[, all := "all"]
@@ -94,4 +94,4 @@ pdt[, part_symp_any := fifelse(part_symp_any==0,0,1)]
 pdt[, dayweight := fifelse(weekday %in% c("Sunday", "Saturday"), 2/7, 5/7)]
 
 
-qs::qsave(pdt, "data/dt_all_weighted_dmed.qs")
+qs::qsave(pdt, "data/dt_all_100d.qs")

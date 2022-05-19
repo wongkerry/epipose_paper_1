@@ -16,10 +16,10 @@ library(zoo)
 
 loadfonts()
 windowsFonts(`Segoe UI` = windowsFont('Segoe UI'))
-# Source user written scripts ---------------------------------------------
 
-## other functions
+# Source user written scripts ---------------------------------------------
 source('r/functions/bs_group.R')
+source('r/functions/map_country_group.R')
 
 format_quarters <- function(x) {
   x <- as.yearqtr(x)

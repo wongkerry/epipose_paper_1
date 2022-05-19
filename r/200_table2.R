@@ -9,10 +9,9 @@ library(dplyr)
 source('r/functions/map_country_group.R')
 specify_decimal <- function(x, k) trimws(format(round(x, k), nsmall=k))
 
-
 options("digits" = 2)
 
-pdt <- qs::qread("data/dt_all_weighted_dmed.qs")
+pdt <- qs::qread("data/dt_all_100d.qs")
 pdt[, group := map_country_group[country]]
 pdt[, g0g123 := map_country_g0g123[country]]
 

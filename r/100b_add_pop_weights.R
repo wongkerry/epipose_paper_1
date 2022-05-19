@@ -135,7 +135,7 @@ pdt <- merge(pdt, weightlookup2, by = c("country", "mid_date", "part_gender", "p
 summary(pdt$genderageweight_proportion)
 
 
-qs::qsave(pdt, "data/dt_all_weighted.qs")
-message("Saved to: data/dt_all_weighted.qs")
+qs::qsave(pdt, "data/dt_all_100b.qs")
+message("Saved to: data/dt_all_100b.qs")
 
 
