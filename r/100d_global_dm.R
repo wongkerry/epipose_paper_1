@@ -14,7 +14,7 @@ pdt <- qs::qread("data/dt_all_100c.qs")
 pdt[, all := "all"]
 
 #age
-
+pdt[cnt_others<0, cnt_others := 0]
 
 #perception
 pdt[, part_att_likely := fifelse(part_att_likely == "Strongly agree",1,0)]
