@@ -39,14 +39,15 @@ dts[grep("^C", coef), group := "Containment \nmeasures"]
 
 dts[grep("part_att", coef), group := "Risk \nperception"]
 
-dts[is.na(group), group := "Risk or risk\nmitigation"]
+dts[is.na(group), group := "Risk or risk mitigation"]
 
 dts[, group := factor(group, levels = c("Demographic \ncharacteristics",
                                         "Household \ncharacteristics",
                                         "Containment \nmeasures", 
                                         "Risk \nperception",
-                                        "Risk or risk\nmitigation"))]
+                                        "Risk or risk mitigation"))]
 
+dts[, coef := gsub("factor(part_age_group)", "Age: ", coef, fixed=TRUE)]
 dts[, coef := gsub("part_gendermale", "Male", coef)]
 dts[, coef := gsub("old", "Living with 65+", coef)]
 dts[, coef := gsub("hh_size", "No. household members", coef)]
@@ -56,9 +57,9 @@ dts[coef=="C3", coef := "C3: Public events \ncancellation"]
 dts[coef=="C6", coef := "C6: Stay-at-home orders"]
 
 dts[, coef := gsub("part_att_", "", coef)]
-dts[coef=="likely", coef := "Likely to catch COVID"]
+dts[coef=="likely",  coef := "Likely to catch COVID"]
 dts[coef=="serious", coef := "Likely to have serious \nCOVID symptoms"]
-dts[coef=="spread", coef := "Likely to spread COVID \nto someone vulnerable"]
+dts[coef=="spread",  coef := "Likely to spread COVID \nto someone vulnerable"]
 
 dts[coef=="part_symp_any", coef := "COVID symptoms"]
 dts[coef=="risk", coef := "High risk (self-reported"]
@@ -69,22 +70,23 @@ dts[, setting := factor(stringr::str_to_title(setting), levels = c("All",
                                                                    "Home", 
                                                                    "Work", 
                                                                    "Others"))]
-
 ggplot(dts[], aes(color=pooled, shape=pooled)) +
   geom_vline(xintercept=0, linetype="dotted") +
-  geom_errorbarh(aes(xmin = lci, xmax = uci, y=model), color = "black", height=0) +
-  geom_point(aes(x = est, y = model)) +
+  geom_errorbarh(aes(xmin = lci, xmax = uci, y=model), height=0) +
+  geom_point(aes(x = est, y = model), alpha=0.8) +
   scale_y_discrete(limits = rev(levels(dts$model)), name = "") + 
   scale_x_continuous("Estimates of effect sizes") +
   scale_shape_manual(values=c(16, 17))+
-  scale_color_manual(values=c("grey25", "red"))+
-  facet_nested(group+coef~setting, switch = "y", scale = "free") +
+  scale_color_manual(values=c("grey50", "#1b9e77"))+
+  scale_fill_manual(values=c( "grey50", "#1b9e77"))+
+  facet_nested(group+coef~setting, switch = "y", scale = "free",
+               labeller = label_wrap_gen(15)) +
+  labs(caption = "(Effect sizes adjusted for fatigue effect, year-month and weekday/weekend)") +
   theme_bw() +
   theme(legend.position = "none",
         strip.placement = "outside",
-        axis.text.y = element_text(size=9), 
+        axis.text.y = element_text(size=8), 
         axis.text.x = element_text(size=8), 
         text = element_text(family = "Segoe UI", size=14), 
-        strip.text.y.left = element_text(angle = 0, hjust=0))
-
+        strip.text.y.left = element_text(angle = 0, hjust=0, size=10))
 

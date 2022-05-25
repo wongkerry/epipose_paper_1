@@ -49,8 +49,6 @@ pdt[, ym := yearmonth(date)]
 pdt[, first_ym := min(ym), by = .(country, panel)]
 pdt[, ym := ym - first_ym + 1]
 
-pdt[, first_survey := min(survey_round), by = .(part_id)]
-
 pdt[, part_id := gsub("de_de_", "de_", part_id)]
 pdt[, new_id := .GRP, by = .(country, panel, part_id)]
 pdt[, new_id := as.numeric(new_id)]
@@ -58,6 +56,9 @@ pdt[, new_id := as.numeric(new_id)]
 pdt[, part_id := substr(part_id, 4, nchar(part_id))]
 pdt[, part_id := as.numeric(part_id)]
 pdt[, country := factor(country)]
+
+setorder(pdt, country, panel, new_id, survey_round)
+pdt[, `:=`(order = 1:.N), by = .(country, panel, new_id)]
 
 pdt <- pdt[part_gender != "other"]
 
@@ -78,7 +79,7 @@ pdt <- pdt[part_gender != "other"]
                      C1 + C2 + C3 + C6 +
                      part_att_likely + part_att_spread + part_att_serious +
                      part_symp_any + risk + mask + vacc +
-                     weekday + s(ym, k=4) + s(first_survey, k=3), 
+                     weekday + s(ym, k=4) + s(order, k=3), 
                      data = sub_pdt, 
                      family = nb(link = "log"), 
                      weights = genderageweight_proportion)
@@ -86,6 +87,8 @@ pdt <- pdt[part_gender != "other"]
     all_list[[i]] <- ci_gam(all)
     all_list[[i]]$model <- this_model
     all_list[[i]]$setting <- "all"        
+    
+    predict <- predict(all, )
     
   }
   all_list <- rbindlist(all_list)
@@ -108,7 +111,7 @@ pdt <- pdt[part_gender != "other"]
                            C1 + C2 + C3 + C6 +
                            part_att_likely + part_att_spread + part_att_serious +
                            part_symp_any + risk + mask + vacc +
-                           weekday + s(ym, k=4) + s(first_survey, k=3), 
+                           weekday + s(ym, k=4) + s(order, k=3), 
                            data = sub_pdt, 
                            family = nb(link = "log"), 
                            weights = genderageweight_proportion)
@@ -135,7 +138,7 @@ pdt <- pdt[part_gender != "other"]
                               C1 + C2 + C3 + C6 +
                               part_att_likely + part_att_spread + part_att_serious +
                               part_symp_any + risk + mask + vacc +
-                              weekday + s(ym, k=4) + s(first_survey, k=3), 
+                              weekday + s(ym, k=4) + s(order, k=3), 
                               data = sub_pdt, 
                               family = nb(link = "log"), 
                               weights = genderageweight_proportion)
@@ -162,7 +165,7 @@ pdt <- pdt[part_gender != "other"]
                            C1 + C2 + C3 + C6 +
                            part_att_likely + part_att_spread + part_att_serious +
                            part_symp_any + risk + mask + vacc +
-                           weekday + s(ym, k=4) + s(first_survey, k=3), 
+                           weekday + s(ym, k=4) + s(order, k=3), 
                            data = sub_pdt, 
                            family = nb(link = "log"), 
                            weights = genderageweight_proportion)
@@ -226,7 +229,7 @@ pdt <- pdt[part_gender != "other"]
   qs::qsave(gam_out, file_path)
   message(paste("saved to:", file_path))  
   
-  
+  write.table(gam_out, "outputs/forest_plot_est.csv", sep=",", row.names = FALSE)
   
   
   
