@@ -16,9 +16,9 @@ path <- "C:\\Users\\wkerr\\Filr\\Net Folders\\EPH Shared\\Comix_survey\\data\\va
 #load pt files 
 pt <- as.data.table(qs::qread(paste0(path, "part.qs")))
 pt <- pt[!country %in% c("no", "be", "nl")]
-pt <- pt[sample_type == "adult"]
+
   #some children participant marked as adult?
-  pt <- pt[!part_age_group %in% c("Under 1", "0-4", "5-11", "12-17")]
+  #pt <- pt[!part_age_group %in% c("Under 1", "0-4", "5-11", "12-17")]
   pt <- pt[part_age_group == "18-19", part_age_group := "18-29"]
   pt[part_age_group == "25-34", part_age_group := "30-39"] #2 obs
   pt[part_age_group == "35-44", part_age_group := "40-49"] #1 obs
@@ -40,7 +40,8 @@ sum(duplicated(pt$part_wave_uid)) #confirm no duplicated survey responses
                part_age_group, part_gender, 
                part_att_spread, part_att_likely, part_att_serious,
                part_attend_work_week, part_attend_work_yesterday, part_limit_work_atleast_day,
-               part_face_mask,
+               part_attend_education_week, part_attend_education_yesterday, part_limit_school_atleast_day, 
+               part_attend_school_yesterday,
                part_vacc, part_vacc_doses, part_vacc_newdose, part_vacc_newdose_doses
                )],
               pt[, ..symp],
@@ -84,6 +85,10 @@ for (j in var_list){
 
 ## Remove round 6 and 7
 dt <- dt[!(country == "uk" & survey_round %in% 6:7)]
+
+  qs::qsave(dt[sample_type=="child" & country=="uk"], "data/dt_uk_child.qs")
+  qs::qsave(dt[sample_type=="child" & country!="uk"], "data/dt_g123_child.qs")
+  dt <- dt[sample_type == "adult"]
 
 ##split and save
 qs::qsave(dt[country=="uk"], "data/dt_uk.qs")

@@ -15,7 +15,6 @@ sumna <- function(x) sum(x, na.rm = TRUE)
 pt <- qs::qread("C:\\Users\\wkerr\\Dropbox\\lshtm\\CoMix\\epipose_paper_1\\raw data\\nl\\nl_kerry.qs")
 pt <- as.data.table(pt)
 pt[, country := "nl"]
-pt <- pt[sample_type == "adult"]
 pt[, weekday := wday(date, label=TRUE, abbr=FALSE)]
 
 pt[, part_wave_uid := paste0(country, "_", panel, wave, "_", part_id)]
@@ -57,6 +56,7 @@ sum(duplicated(pt$part_wave_uid)) #confirm no duplicated survey responses
                      hh_size, old, 
                      part_att_spread, part_att_likely, part_att_serious,
                      part_attend_work_week, part_attend_work_yesterday, part_limit_work_atleast_day,
+                     part_attend_education_week, part_attend_education_yesterday, part_limit_school_atleast_day, 
                      part_face_mask,
                      part_vacc, 
                      cnt, cnt_home, cnt_work, cnt_others
@@ -66,5 +66,7 @@ sum(duplicated(pt$part_wave_uid)) #confirm no duplicated survey responses
 
   
 #save dt
-qs::qsave(pt, "data/dt_nl.qs")
+qs::qsave(pt[sample_type=="child"], "data/dt_nl_child.qs")
+qs::qsave(pt[sample_type=="adult"], "data/dt_nl.qs")
+
   

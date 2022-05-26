@@ -15,8 +15,8 @@ sumna <- function(x) sum(x, na.rm = TRUE)
 load(file="C:\\Users\\wkerr\\Dropbox\\lshtm\\CoMix\\epipose_paper_1\\raw data\\de\\COVIMOD_data_2022-03-23.Rda")
 pt <- as.data.table(COVIMOD_data)
 pt[, country := "de"]
-pt <- pt[!part_age_group %in% c("<1", "1-4", "5-9", "10-14", "15-19")]
-pt[, sample_type := "adult"]
+pt[part_age_group %in% c("<1", "1-4", "5-9", "10-14", "15-19"), sample_type := "child"]
+pt[is.na(sample_type), sample_type := "adult"]
 
 pt[, panel := "A"]
 pt[, survey_round := wave]
@@ -118,6 +118,9 @@ pt[, old := as.numeric(old)]
                      part_workattendance_7days_wave14_33, 
                      part_workattendance_limit_wave1_13, 
                      part_workattendance_yesterday_wave14_33,
+                     part_educationattendance_7days_wave14_33, 
+                     part_educationattendance_limit_wave1_13, 
+                     part_educationattendance_yesterday_wave14_33,
                      part_face_mask,
                      hh_size, old,
                      cnt, cnt_home, cnt_work, cnt_others)],
@@ -130,5 +133,6 @@ pt[, old := as.numeric(old)]
   pt[part_age_group %in% c("70-74", "75-79", "80-84", "85+"), part_age_group := "70-120"]
   
 #save dt
-qs::qsave(pt, "data/dt_de.qs")
-  
+qs::qsave(pt[sample_type=="child"], "data/dt_de_child.qs")
+qs::qsave(pt[sample_type=="adult"], "data/dt_de.qs")
+

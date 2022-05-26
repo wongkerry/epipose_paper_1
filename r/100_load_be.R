@@ -20,7 +20,6 @@ local <- "C:\\Users\\wkerr\\Dropbox\\lshtm\\CoMix\\epipose_paper_1\\raw data\\be
   pt3 <- as.data.table(qs::qread(paste0(local, "raw_data_comix_wave_33_plus\\part_v5_be.qs")))
 
 pt <- rbind(pt1, pt2, pt3, fill = TRUE)
-pt <- pt[sample_type == "adult"]
 sum(duplicated(pt$part_wave_uid)) #confirm no duplicated survey responses
 
   #select only the required variables
@@ -37,6 +36,7 @@ sum(duplicated(pt$part_wave_uid)) #confirm no duplicated survey responses
                      part_age_group, part_gender, 
                      part_att_spread, part_att_likely, part_att_serious,
                      part_attend_work_week, part_attend_work_yesterday, part_limit_work_atleast_day,
+                     part_attend_education_week, part_attend_education_yesterday, part_limit_school_atleast_day, 
                      part_face_mask,
                      part_vacc, part_vacc_doses, part_vacc_newdose, part_vacc_newdose_doses
   )],
@@ -88,9 +88,12 @@ for (j in var_list){
 }
 
 
-## Remove round 6 and 7
-
 ##split and save
+##children
+qs::qsave(dt[sample_type=="child"], "data/dt_be_child.qs")
+
+##adult
+dt <- dt[sample_type == "adult"]
 qs::qsave(dt[], "data/dt_be.qs")
 
 
