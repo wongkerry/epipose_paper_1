@@ -42,16 +42,16 @@ bs_group <- function(dt,
 
       iteration = i, 
       # All = weighted.mean(cnt, w = dayweight),
-      All_genderage = weighted.mean(cnt, w = dayweight * genderageweight_raw)
+      All_genderage = weighted.mean(cnt, w = dayweight * genderageweight_raw),
       
       # Home = weighted.mean(cnt_home,  w = dayweight),
-      # Home_genderage = weighted.mean(cnt_home, w = dayweight * genderageweight_raw),
+      Home_genderage = weighted.mean(cnt_home, w = dayweight * genderageweight_raw),
       # 
       # Work = weighted.mean(cnt_work,  w = dayweight),
-      # Work_genderage = weighted.mean(cnt_work, w = dayweight * genderageweight_raw),
+      Work_genderage = weighted.mean(cnt_work, w = dayweight * genderageweight_raw),
       # 
       # Other = weighted.mean(cnt_others,  w = dayweight),
-      # Other_genderage = weighted.mean(cnt_others, w = dayweight * genderageweight_raw)
+      Other_genderage = weighted.mean(cnt_others, w = dayweight * genderageweight_raw)
     
       
       # Physical = weighted.mean(cnt_phys,  w = dayweight),

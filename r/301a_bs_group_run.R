@@ -47,7 +47,7 @@ message(paste("Running", boots, "bootstrapped samples"))
 dt_boot[, n := round(median(N)), 
         by = .(country, panel, start_date, mid_date, end_date)]
 
-mea_vars <- c("All_genderage")
+mea_vars <- c("All_genderage", "Work_genderage", "Home_genderage", "Other_genderage")
 
 l_dt <- melt(dt_boot, id.vars = c("country","panel",
                                   "start_date", "mid_date", "end_date", "survey_round", "n"), 

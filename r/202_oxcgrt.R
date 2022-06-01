@@ -42,6 +42,8 @@ oxcgrt[, date := as.character(date)]
 oxcgrt$date <- as.Date(oxcgrt$date, format = "%Y%m%d")
 oxcgrt[location == "Slovak Republic", location := "Slovakia"]
 
+  qs::qsave(oxcgrt, "data/stringency_index.qs")
+
 # load participant data
 pdt <- qs::qread("data/dt_all_100d.qs")
 pdt <- unique(pdt[, .(country, start_date)])

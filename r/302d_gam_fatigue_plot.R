@@ -31,7 +31,7 @@ dts[, model := toupper(model)]
 
 dts[, model := factor(model, levels = c("UK", "BE", "NL", "DE", "G1", "G2", "G3"))]
       
-ggplot(dts) + 
+ggplot(dts[order<=20]) + 
   geom_line(aes(x=order, y=smooth, group=model, color=model)) +
   geom_line(aes(x=order, y=smooth, group=model, color=model)) +
   geom_hline(yintercept=0, linetype="dotted") +
@@ -43,3 +43,4 @@ ggplot(dts) +
   theme_bw() +
   theme(text = element_text(family = "Segoe UI", size=14),
         legend.position="bottom")
+
