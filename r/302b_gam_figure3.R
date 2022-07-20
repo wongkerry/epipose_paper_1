@@ -17,17 +17,16 @@ library(ggh4x)
 loadfonts()
 windowsFonts(`Segoe UI` = windowsFont('Segoe UI'))
 
-# Source user written scripts ---------------------------------------------
+# Source user written scripts -------------------z--------------------------
 source('r/functions/bs_group.R')
 source('r/functions/map_country_group.R')
 
 # Load contact (bs) data ---------------------------------------------------
-dts <- qs::qread("data/20220523_gam_out.qs")
+dts <- qs::qread("data/20220701_gam_out.qs")
 
+dts <- dts[model != "pooled"]
 dts[, model := factor(toupper(model), levels = c("UK", "BE", "NL", "DE", 
-                                  "G1", "G2", "G3", "POOLED"))]
-
-dts[, pooled := factor(fifelse(model == "POOLED", 1, 0))]
+                                  "G1", "G2", "G3"))]
 
 dts[grep("part_age", coef), group := "Demographic \ncharacteristics"]
 dts[grep("part_gender", coef), group := "Demographic \ncharacteristics"]
@@ -72,23 +71,22 @@ dts[, setting := factor(stringr::str_to_title(setting), levels = c("All",
                                                                    "Others"))]
 dts[, coef := factor(coef)]
 
-ggplot(dts[], aes(color=pooled, shape=pooled)) +
-  geom_vline(xintercept=0, linetype="dotted") +
+ggplot(dts) +
+  geom_vline(xintercept=1, linetype="dotted") +
   geom_errorbarh(aes(xmin = lci, xmax = uci, y=model), height=0) +
-  geom_point(aes(x = est, y = model), alpha=0.8) +
+  geom_point(aes(x = est, y = model), alpha=0.5) +
   scale_y_discrete(limits = rev(levels(dts$model)), name = "") + 
-  scale_x_continuous("Estimates of effect sizes") +
+  scale_x_continuous("Relative difference in mean number of contacts") +
   scale_shape_manual(values=c(16, 17))+
   scale_color_manual(values=c("grey50", "#1b9e77"))+
   scale_fill_manual(values=c( "grey50", "#1b9e77"))+
   facet_nested(group+coef~setting, switch = "y", scale = "free",
                labeller = label_wrap_gen(15)) +
-  labs(caption = "(Effect sizes adjusted for fatigue effect, year-month and weekday/weekend)") +
   theme_bw() +
   theme(legend.position = "none",
         strip.placement = "outside",
-        axis.text.y = element_text(size=8), 
-        axis.text.x = element_text(size=8), 
-        text = element_text(family = "Segoe UI", size=14), 
-        strip.text.y.left = element_text(angle = 0, hjust=0, size=10))
+        axis.text.y = element_text(size=10), 
+        axis.text.x = element_text(size=12), 
+        strip.text.y.left = element_text(angle = 0, hjust=0, size=13),
+        text = element_text(family = "Segoe UI"))
 

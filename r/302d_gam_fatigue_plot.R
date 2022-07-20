@@ -22,7 +22,7 @@ source('r/functions/bs_group.R')
 source('r/functions/map_country_group.R')
 
 # Load contact (bs) data ---------------------------------------------------
-dts <- qs::qread("data/20220527_gam_fatigue_out.qs")
+dts <- qs::qread("data/20220627_gam_fatigue_out.qs")
 setnames(dts, "s.V1", "smooth")
 
 dts[, setting := stringr::str_to_title(setting)]
@@ -30,14 +30,22 @@ dts[, setting := factor(setting, levels = c("All", "Home", "Work", "Others"))]
 dts[, model := toupper(model)]
 
 dts[, model := factor(model, levels = c("UK", "BE", "NL", "DE", "G1", "G2", "G3"))]
-      
+dts[, smooth := exp(smooth)]
+
+rel <- dts[order==1, list(rel = smooth), by = .(model, setting)]
+
+dts <- merge(dts, rel, by = c("model", "setting"))
+dts[, smooth := smooth/rel]
+
+
 ggplot(dts[order<=20]) + 
-  geom_line(aes(x=order, y=smooth, group=model, color=model)) +
-  geom_line(aes(x=order, y=smooth, group=model, color=model)) +
-  geom_hline(yintercept=0, linetype="dotted") +
+  geom_smooth(aes(x=order, y=smooth, group = model, color=model), size=0.5, se = FALSE) +
+  geom_hline(yintercept=1, linetype="dotted") +
   facet_wrap(.~setting, nrow=1) +
-  scale_y_continuous(name = "Effect size") +
-  scale_x_continuous(name = "Number of survey responded") +
+  scale_y_continuous(name = "Relative difference in \nmean number of contacts", 
+                     breaks = seq(0.4, 1.4, 0.2)) +
+  scale_x_continuous(name = "Number of survey responded to per participant", expand = c(0,0), 
+                     breaks = c(1,5,10,15,20), limits = c(1,20)) +
   guides(color=guide_legend(title = "", nrow = 1, byrow = FALSE, 
                            override.aes = list(size = 0.1))) +
   theme_bw() +

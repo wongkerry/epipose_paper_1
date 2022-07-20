@@ -98,6 +98,7 @@ pdt[, start_date := min(date), by = .(country, survey_round)]
 pdt[, end_date := max(date), by = .(country, survey_round)]
 pdt[, mid_date := start_date + floor((end_date - start_date)/2) , by = .(country, survey_round)]
 
+nrow(pdt[!is.na(part_age_group) & part_gender != "other"])*100/nrow(pdt)
 
 weightlookup <- pdt[!is.na(part_age_group) & part_gender != "other", 
                     .(sample = .N), by = .(country, mid_date, part_gender, part_age_group, sample_type)]

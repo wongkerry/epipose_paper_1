@@ -22,12 +22,11 @@ source('r/functions/bs_group.R')
 source('r/functions/map_country_group.R')
 
 # Load contact (bs) data ---------------------------------------------------
-dts <- qs::qread("data/20220523_gam_out.qs")
+dts <- qs::qread("data/20220701_gam_out.qs")
 
+dts <- dts[model != "pooled"]
 dts[, model := factor(toupper(model), levels = c("UK", "BE", "NL", "DE", 
-                                                 "G1", "G2", "G3", "POOLED"))]
-
-dts[, pooled := factor(fifelse(model == "POOLED", 1, 0))]
+                                                 "G1", "G2", "G3"))]
 
 dts[grep("part_age", coef), group := "Demographic \ncharacteristics"]
 dts[grep("part_gender", coef), group := "Demographic \ncharacteristics"]

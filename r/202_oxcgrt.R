@@ -67,11 +67,15 @@ pdt <- melt(pdt, measure.vars = c("C1", "C2", "C3", "C4","C5", "C6", "C7", "C8")
 pdt <- merge(pdt, order[, .(country, order)])
 pdt[, rule := as.numeric(substr(rule,2,2))]
 
+# update of restrictions according to Kari's email
+pdt[country=="fi" & rule==1 & date>"2021-04-15", value := 0]
+pdt[country=="fi" & rule==6, value := 0]
+
 cols <- c("0" = "#00aedb", 
           "1" = "#ffc425", 
           "2" = "#f37735", 
           "3" = "#d11141", 
-          "4" = "#8c8c8c") #https://i2.wp .com/svbtleusercontent.com/zxequdizcj5apg.png?ssl=1
+          "4" = "#8B0000") #https://i2.wp .com/svbtleusercontent.com/zxequdizcj5apg.png?ssl=1
 
   #date labels for plot
   pdt[, date_num := as.numeric(date)]

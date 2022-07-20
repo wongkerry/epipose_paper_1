@@ -10,7 +10,7 @@ library(tsibble)
 source('r/functions/map_country_group.R')
 source('r/functions/ci_gam.R')
 
-options("digits" = 2)
+options("digits" = 3)
 
 pdt <- qs::qread("data/dt_all_100d.qs")
 pdt[, group := map_country_group[country]]
@@ -62,10 +62,14 @@ pdt[, `:=`(order = 1:.N), by = .(country, panel, new_id)]
 
 pdt <- pdt[part_gender != "other"]
 
+pdt <- pdt[!is.na(hh_size)]
+
   #all contacts
   all_list <- list()
   all_order <- list() #this list captures survey fatigue effect
   
+Sys.time()
+
   for (i in 1:length(unique(pdt$model))){
     
     this_model <- unique(pdt$model)[i]
@@ -79,7 +83,7 @@ pdt <- pdt[part_gender != "other"]
                      part_symp_any + risk + mask + vacc +
                      weekday + s(ym, k=4) + s(order, k=3), 
                      data = sub_pdt, 
-                     family = nb(link = "log"), 
+                     family = ziP(), 
                      weights = genderageweight_proportion)
    
     all_list[[i]] <- ci_gam(all)
@@ -96,6 +100,7 @@ pdt <- pdt[part_gender != "other"]
       model = this_model,
       setting = "all"
     )
+    
     
   }
   all_list <- rbindlist(all_list)
@@ -121,7 +126,7 @@ pdt <- pdt[part_gender != "other"]
                            part_symp_any + risk + mask + vacc +
                            weekday + s(ym, k=4) + s(order, k=3), 
                            data = sub_pdt, 
-                           family = nb(link = "log"), 
+                           family = ziP(), 
                            weights = genderageweight_proportion)
               
     home_list[[i]] <- ci_gam(home)
@@ -161,15 +166,12 @@ pdt <- pdt[part_gender != "other"]
                               part_symp_any + risk + mask + vacc +
                               weekday + s(ym, k=4) + s(order, k=3), 
                               data = sub_pdt, 
-                              family = nb(link = "log"), 
+                              family = ziP(), 
                               weights = genderageweight_proportion)
                 
     others_list[[i]] <- ci_gam(others)
     others_list[[i]]$model <- this_model
     others_list[[i]]$setting <- "others"    
-    
-    plotdata <- plot(others, pages = 1)
-    which <- grep("order", plotdata)
     
     others_order[[i]] <- data.table(
       s = plotdata[[which]]$fit, 
@@ -177,6 +179,7 @@ pdt <- pdt[part_gender != "other"]
       model = this_model,
       setting = "others"
     )    
+    
   } 
   others_list <- rbindlist(others_list)
   others_order <- rbindlist(others_order)
@@ -190,7 +193,8 @@ pdt <- pdt[part_gender != "other"]
     
     this_model <- unique(pdt$model)[i]
     
-    sub_pdt <- pdt[attend==1 & model == this_model & part_age_group != "70-120"]
+    sub_pdt <- pdt[part_age_group != "70-120"]
+    sub_pdt <- sub_pdt[attend==1 & model == this_model]
     
     work <- bam(cnt_work ~ s(new_id, by = country, bs = "re") + 
                            factor(part_age_group) + 
@@ -200,15 +204,12 @@ pdt <- pdt[part_gender != "other"]
                            part_symp_any + risk + mask + vacc +
                            weekday + s(ym, k=4) + s(order, k=3), 
                            data = sub_pdt, 
-                           family = nb(link = "log"), 
+                           family = ziP(), 
                            weights = genderageweight_proportion)
     
     work_list[[i]] <- as.data.table(ci_gam(work))
     work_list[[i]]$model <- this_model
     work_list[[i]]$setting <- "work"
-    
-    plotdata <- plot(work, pages = 1)
-    which <- grep("order", plotdata)
     
     work_order[[i]] <- data.table(
       s = plotdata[[which]]$fit, 
@@ -216,11 +217,13 @@ pdt <- pdt[part_gender != "other"]
       model = this_model,
       setting = "work"
     )    
+    
   }
   work_list <- rbindlist(work_list)
   work_order <- rbindlist(work_order)
   
 
+Sys.time()
 
 # Save survey fatigue effect data ---------------------------------------------------------------
 order <- rbind(all_order, home_order, others_order, work_order)
@@ -230,49 +233,50 @@ qs::qsave(order, file_path)
 message(paste("saved to:", file_path))    
 
 
-
-#add pooled effect 
+# #add pooled effect 
   gam_out <- rbind(all_list, home_list, others_list, work_list)
   gam_out <- gam_out[coef != "(Intercept)"]
   gam_out <- gam_out[coef != "part_genderother"]
   gam_out <- gam_out[coef != "weekday"]
-  
+
+  gam_out$est <- exp(gam_out$est)
+  gam_out$lci <- exp(gam_out$lci)
+  gam_out$uci <- exp(gam_out$uci)
+
   coefs <- unique(gam_out$coef)
   settings <- unique(gam_out$setting)
-  
-  pooled <- unique(gam_out[, .(coef, setting)])
-  pooled[, model := "pooled"]
-  
-  
-  for (i in 1:length(coefs)){
-    for (j in 1:length(settings)){
-      
-      this_coef <- coefs[i]
-      this_set <- settings[j]
-      
-        if (this_coef == "factor(part_age_group)70-120" & this_set=="work"){
-          next
-        }
-      
-      meta <- metagen(TE = est,
-                      seTE = se,
-                      studlab = model,
-                      data = gam_out[setting==this_set & coef==this_coef],
-                      fixed = FALSE,
-                      random = TRUE,
-                      method.tau = "REML",
-                      hakn = TRUE)
-      pooled[setting==this_set & coef==this_coef, est := meta$TE.random]
-      pooled[setting==this_set & coef==this_coef, se := meta$seTE.random]
-      pooled[setting==this_set & coef==this_coef, lci := meta$lower.random]
-      pooled[setting==this_set & coef==this_coef, uci := meta$upper.random]
-    }
-  }
-  
-  gam_out <- rbind(gam_out, pooled)
-  setorder(gam_out, setting, coef, model)
-  
-  
+
+#   pooled <- unique(gam_out[, .(coef, setting)])
+#   pooled[, model := "pooled"]
+#   
+#   
+#   for (i in 1:length(coefs)){
+#     for (j in 1:length(settings)){
+#       
+#       this_coef <- coefs[i]
+#       this_set <- settings[j]
+#       
+#         if (this_coef == "factor(part_age_group)70-120" & this_set=="work"){
+#           next
+#         }
+#       
+#       meta <- metagen(TE = est,
+#                       seTE = se,
+#                       studlab = model,
+#                       data = gam_out[setting==this_set & coef==this_coef],
+#                       fixed = FALSE,
+#                       random = TRUE,
+#                       method.tau = "REML",
+#                       hakn = TRUE)
+#       pooled[setting==this_set & coef==this_coef, est := meta$TE.random]
+#       pooled[setting==this_set & coef==this_coef, se := meta$seTE.random]
+#       pooled[setting==this_set & coef==this_coef, lci := meta$lower.random]
+#       pooled[setting==this_set & coef==this_coef, uci := meta$upper.random]
+#     }
+#   }
+#   
+#   gam_out <- rbind(gam_out, pooled)
+#   setorder(gam_out, setting, coef, model)
   
   
   # Save data ---------------------------------------------------------------
@@ -281,7 +285,7 @@ message(paste("saved to:", file_path))
   qs::qsave(gam_out, file_path)
   message(paste("saved to:", file_path))  
   
-  write.table(gam_out, "outputs/forest_plot_est.csv", sep=",", row.names = FALSE)
+  #write.table(gam_out, "outputs/forest_plot_est.csv", sep=",", row.names = FALSE)
   
   
   
