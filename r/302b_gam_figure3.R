@@ -12,7 +12,7 @@ library(ggplot2)
 library(gghighlight)
 library(extrafont)
 library(scales)
-library(ggh4x)
+devtools::install_github("teunbrand/ggh4x")
 
 loadfonts()
 windowsFonts(`Segoe UI` = windowsFont('Segoe UI'))
