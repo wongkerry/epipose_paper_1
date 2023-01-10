@@ -36,14 +36,15 @@ rel <- dts[order==1, list(rel = smooth), by = .(model, setting)]
 
 dts <- merge(dts, rel, by = c("model", "setting"))
 dts[, smooth := smooth/rel]
+dts[, smooth := log(smooth)]
 
 
 ggplot(dts[order<=20]) + 
   geom_smooth(aes(x=order, y=smooth, group = model, color=model), size=0.5, se = FALSE) +
-  geom_hline(yintercept=1, linetype="dotted") +
+  geom_hline(yintercept=0, linetype="dotted") +
   facet_wrap(.~setting, nrow=1) +
   scale_y_continuous(name = "Relative difference in \nmean number of contacts", 
-                     breaks = seq(0.4, 1.4, 0.2)) +
+                     breaks = seq(-1.5, 0.5, 0.5), limits = c(-1.5, 0.5)) +
   scale_x_continuous(name = "Number of survey responded to per participant", expand = c(0,0), 
                      breaks = c(1,5,10,15,20), limits = c(1,20)) +
   guides(color=guide_legend(title = "", nrow = 1, byrow = FALSE, 

@@ -23,6 +23,9 @@ source('r/functions/map_country_group.R')
 
 # Load contact (bs) data ---------------------------------------------------
 dts <- qs::qread("data/20220701_gam_out.qs")
+dts[, est := log(est)]
+dts[, uci := log(uci)]
+dts[, lci := log(lci)]
 
 dts <- dts[model != "pooled"]
 dts[, model := factor(toupper(model), levels = c("UK", "BE", "NL", "DE", 
@@ -72,7 +75,7 @@ dts[, setting := factor(stringr::str_to_title(setting), levels = c("All",
 dts[, coef := factor(coef)]
 
 ggplot(dts) +
-  geom_vline(xintercept=1, linetype="dotted") +
+  geom_vline(xintercept=0, linetype="dotted") +
   geom_errorbarh(aes(xmin = lci, xmax = uci, y=model), height=0) +
   geom_point(aes(x = est, y = model), alpha=0.5) +
   scale_y_discrete(limits = rev(levels(dts$model)), name = "") + 
