@@ -56,19 +56,6 @@ dts[country=="it", polymod := 19.77]
 dts[country=="nl", polymod := 13.85]
 dts[country=="pl", polymod := 16.31]
 
-# p <- ggplot(dts[setting == "All_genderage"]) +
-#   geom_ribbon(aes(x=mid_date, ymin=lci, ymax=uci, group=country_panel), fill="red", alpha=0.2) +
-#   geom_line(aes(x=mid_date, y=mean, group=country_panel), color="red", size=0.8) +
-#   gghighlight(use_direct_label = FALSE) +
-#   geom_text(aes(x=min(dts$end_date)+40, y=18, label = toupper(country)), family = "Segoe UI", size=6) +
-#   facet_grid(group~order, drop = TRUE) +
-#   geom_hline(aes(yintercept=polymod), linetype = "dashed") +
-#   scale_y_continuous(name = "Mean contacts") +
-#   scale_x_date(name = "", breaks = date_breaks("3 months"), labels = format_quarters) + 
-#   theme_minimal() +
-#   theme(strip.text = element_blank(),
-#         text = element_text(family = "Segoe UI", size=20),
-#         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
 
 dts <- dts[!(country=="uk" & panel == "B")]
 dts <- dts[!(country=="uk" & panel == "F")]
@@ -86,62 +73,49 @@ dts <- melt(dts, id = c("country", "country_panel", "mid_date", "end_date", "gro
 setnames(dts, "variable", "setting")
 setnames(dts, "value", "mean")
 
-ggplot(dts[setting == "All"]) +
-  facet_grid(group~order, drop = TRUE) +
-  geom_line(aes(x=mid_date, y=mean, group=interaction(setting, country_panel)),
-            colour= 'black', linetype = "all", show.legend = TRUE) +
-  geom_hline(aes(yintercept=polymod), linetype = "polymod", show.legend = TRUE) +
-  scale_linetype_manual(values = c(1,2))
+setattr(dts[["setting"]],"levels",c("Contacts in other settings (not work and not home)",
+                                    "Contacts at work",
+                                    "Contacts at home",
+                                    "Contacts across all settings"))
 
-
-# p <- ggplot() +
-#   geom_area(data=dts[setting != "All"],  
-#             aes(x=mid_date, y=mean, group=interaction(setting, country_panel), fill = setting), size=0.8) +
-#   #gghighlight(use_direct_label = FALSE) +
-#   geom_text(data=dts[setting != "All"], aes(x=min(dts$end_date)+40, y=18, label = toupper(country)), family = "Segoe UI", size=8) +
-#   facet_grid(group~order, drop = TRUE) +
-#   geom_line(data=dts[setting=="All"], aes(x=mid_date, y=mean, group=interaction(setting, country_panel))) +
-#   geom_hline(data=dts[], aes(yintercept=polymod), linetype = "dashed", show.legend=TRUE) +
-#   scale_fill_brewer(palette = "Set2", name = "",
-#                     guide = guide_legend(reverse = TRUE)) +
-#   scale_y_continuous(name = "Mean contacts") +
-#   scale_x_date(name = "", breaks = date_breaks("3 months"), labels = format_quarters) + 
-#   theme_minimal() +
-#   theme(strip.text = element_blank(),
-#         text = element_text(family = "Segoe UI", size=20),
-#         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-#         legend.position = "bottom",
-#         legend.box.margin=margin(-10,-10,-10,-10)) 
-
-setattr(dts[["setting"]],"levels",c("In other settings", 
-                                    "At work", 
-                                    "At home", 
-                                    "All"))
-
+dts[, country_name := map_country_name[country]]
+dts[, group := gsub("G", "Gouup ", group)]
+dts[, group := paste0(group, "\n countries")]
 
 p <- ggplot() +
-  geom_line(data=dts[setting == "All"],  
-            aes(x=mid_date, y=mean, color = "All settings", 
-                group=interaction(setting, country_panel)), size=0.8) +
-  scale_color_manual(name = "", values = c("All settings"="black")) +
-  geom_area(data=dts[setting != "All"],
+  geom_area(data=dts[setting != "Contacts across all settings"],
             aes(x=mid_date, y=mean, group=interaction(setting, country_panel), fill = setting), size=0.8) +
-  geom_text(data=dts[setting != "All"], aes(x=min(dts$end_date)+40, y=18, label = toupper(country)), family = "Segoe UI", size=8) +
-  scale_fill_brewer(palette = "Set2", name = "", guide = guide_legend(reverse = TRUE)) +
-  facet_grid(group~order, drop = TRUE) +
+  geom_text(data=dts[setting != "Contacts across all settings"], 
+            aes(x=min(dts$end_date)+40, y=18, label = toupper(country)), 
+            family = "Segoe UI", size=5) +
+  scale_fill_brewer(palette = "Set2", name = "", guide = guide_legend(reverse = T)) +
   geom_hline(data=dts[], aes(yintercept=polymod, linetype="POLYMOD"), size=0.9, alpha=0.8) +
-  scale_linetype_manual(name="", values=c(POLYMOD="dashed")) +
-  scale_y_continuous(name = "Mean contacts") +
+  geom_line(data=dts[setting == "Contacts across all settings"],  
+            aes(x=mid_date, y=mean, 
+                linetype="Contacts across all settings",
+                group=interaction(setting, country_panel)), 
+            color = "black", size=0.8) +
+  scale_linetype_manual(name = "", 
+                        values=c(POLYMOD="dotted", "Contacts across all settings"="solid"), 
+                        labels=c("Mean number of contacts across all settings", 
+                                 "Mean number of contacts from POLYMOD study (published in 2008)")) +
+  facet_grid(group~order, drop = TRUE, switch = "y") +
+  scale_y_continuous(name = "Daily mean number of contacts") +
   scale_x_date(name = "", breaks = date_breaks("3 months"), labels = format_quarters) + 
   theme_minimal() +
-  theme(strip.text = element_blank(),
-        text = element_text(family = "Segoe UI", size=20),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+  theme(strip.placement = "outside",
+        strip.text.x = element_blank(), 
+        strip.text.y.left = element_text(angle=0), 
+        axis.title.y = element_text(vjust = -23, size=12),
+        strip.switch.pad.grid = unit(0.5, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=10),
+        axis.text.y = element_text(size=10), 
         legend.position = "bottom",
-        legend.box.margin=margin(-10,-10,-10,-10)) +
-  guides(color = guide_legend(order = 1), 
-         fill = guide_legend(order = 2),
-         linetype = guide_legend(order = 3))
+        legend.box="vertical",
+        #legend.box.margin=margin(-10,-10,-10,-10), 
+        text = element_text(family = "Segoe UI", size=14)) +
+  guides(fill = guide_legend(order = 1, reverse = T),
+         linetype = guide_legend(order = 2))
 
 g <- ggplotGrob(p)
 # get the grobs that must be removed

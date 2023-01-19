@@ -153,13 +153,16 @@ ggplot(mean, aes(x=school, y=mean)) +
   geom_jitter(width=0.01, alpha=0.3) +
   stat_summary(fun=median, geom="point", size=2, color="black", shape=3, stroke=1.8, alpha=0.7) +
   geom_hline(aes(yintercept=polymod), linetype = "dashed") +
-  ggrepel::geom_text_repel(aes(label = toupper(country)), family = "Segoe UI") +
+  ggrepel::geom_text_repel(aes(label = toupper(country)), max.overlaps = 15,
+                           family = "Segoe UI") +
   facet_grid(.~age) +
   scale_x_discrete(name = "Did the child attend school?") +
-  scale_y_continuous(name = "Chidren's contact in different countries", limits = c(0,20)) +
+  scale_y_continuous(name = "Social contacts of children in different countries", limits = c(0,20)) +
+  labs(caption = "+ Median across countries \n(Not all countries are labelled to avoid excessive overlapping. All data is shown in Supplementary Material VI.)") +
   theme_bw() +
   theme(
-    text = element_text(family = "Segoe UI", size=16)
+    text = element_text(family = "Segoe UI", size=16), 
+    plot.caption = element_text(size=12)
   ) +
   geom_text(
     data    = dat_text,
@@ -167,7 +170,7 @@ ggplot(mean, aes(x=school, y=mean)) +
     hjust   = -0.1,
     vjust   = -1,
     family= "Segoe UI"
-  )
+  ) 
 
   
   

@@ -126,7 +126,10 @@ all4 <- all + facet_wrap_paginate(~group+coef, ncol = 2, nrow = 3, page = 4)
 all_figure <- ggarrange(all1, all2, all3, all4, nrow=1, 
                         common.legend = TRUE, legend = "bottom")
 
-annotate_figure(all_figure, top = text_grob("Contacts across all settings", family = "Segoe UI"), 
+annotate_figure(all_figure, 
+                fig.lab = "Results are not availabille for some countries",
+                fig.lab.pos = "bottom.left",
+                top = text_grob("Contacts across all settings", family = "Segoe UI"), 
                 bottom = text_grob("Relative difference in mean number of contacts", family = "Segoe UI")
 )
 
