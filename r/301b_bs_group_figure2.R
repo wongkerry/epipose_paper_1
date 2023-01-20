@@ -79,17 +79,17 @@ setattr(dts[["setting"]],"levels",c("Contacts in other settings (not work and no
                                     "Contacts across all settings"))
 
 dts[, country_name := map_country_name[country]]
-dts[, group := gsub("G", "Gouup ", group)]
-dts[, group := paste0(group, "\n countries")]
+dts[, group := gsub("G", "(Group ", group)]
+dts[, group := paste0(group, " countries)")]
+dts[group == "(Group 0 countries)", group := ""]
 
 p <- ggplot() +
   geom_area(data=dts[setting != "Contacts across all settings"],
             aes(x=mid_date, y=mean, group=interaction(setting, country_panel), fill = setting), size=0.8) +
   geom_text(data=dts[setting != "Contacts across all settings"], 
-            aes(x=min(dts$end_date)+40, y=18, label = toupper(country)), 
+            aes(x=min(dts$end_date)+50, y=7, label = toupper(country)), 
             family = "Segoe UI", size=5) +
   scale_fill_brewer(palette = "Set2", name = "", guide = guide_legend(reverse = T)) +
-  geom_hline(data=dts[], aes(yintercept=polymod, linetype="POLYMOD"), size=0.9, alpha=0.8) +
   geom_line(data=dts[setting == "Contacts across all settings"],  
             aes(x=mid_date, y=mean, 
                 linetype="Contacts across all settings",
@@ -97,21 +97,20 @@ p <- ggplot() +
             color = "black", size=0.8) +
   scale_linetype_manual(name = "", 
                         values=c(POLYMOD="dotted", "Contacts across all settings"="solid"), 
-                        labels=c("Mean number of contacts across all settings", 
+                        labels=c("Contacts across all settings", 
                                  "Mean number of contacts from POLYMOD study (published in 2008)")) +
   facet_grid(group~order, drop = TRUE, switch = "y") +
-  scale_y_continuous(name = "Daily mean number of contacts") +
+  scale_y_continuous(limits = c(0, 8), name = "Daily mean number of contacts") +
   scale_x_date(name = "", breaks = date_breaks("3 months"), labels = format_quarters) + 
   theme_minimal() +
   theme(strip.placement = "outside",
         strip.text.x = element_blank(), 
-        strip.text.y.left = element_text(angle=0), 
-        axis.title.y = element_text(vjust = -23, size=12),
-        strip.switch.pad.grid = unit(0.5, "cm"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=10),
-        axis.text.y = element_text(size=10), 
+        strip.text.y.left = element_blank(), 
+        axis.title.y = element_text(size=12),
+        strip.switch.pad.grid = unit(0, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=13),
+        axis.text.y = element_text(size=13), 
         legend.position = "bottom",
-        legend.box="vertical",
         #legend.box.margin=margin(-10,-10,-10,-10), 
         text = element_text(family = "Segoe UI", size=14)) +
   guides(fill = guide_legend(order = 1, reverse = T),

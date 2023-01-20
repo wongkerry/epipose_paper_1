@@ -9,11 +9,27 @@ library(dplyr)
 source('r/functions/map_country_group.R')
 specify_decimal <- function(x, k) trimws(format(round(x, k), nsmall=k))
 
-options("digits" = 2)
-
 pdt <- qs::qread("data/dt_all_100d.qs")
 pdt[, group := map_country_group[country]]
 pdt[, g0g123 := map_country_g0g123[country]]
+
+
+# % above 100
+pdt[, cnt_100 := ifelse(cnt>100, 1, 0)]
+pdt[, cnt_home_100 := ifelse(cnt_home>100, 1, 0)]
+pdt[, cnt_work_100 := ifelse(cnt_work>100, 1, 0)]
+pdt[, cnt_others_100 := ifelse(cnt_others>100, 1, 0)]
+table100 <- pdt %>% 
+  group_by(country) %>% 
+  summarise(all = mean(cnt_100)*100, 
+            home = mean(cnt_home_100)*100, 
+            work = mean(cnt_work_100)*100, 
+            others = mean(cnt_others_100)*100)
+table100 <- as.data.table(table100)
+table100 <- melt(table100, id.vars = c("country"), 
+                 measure.vars = c("all", "home", "work", "others"), 
+                 variable.name = "setting", value.name = "above100")
+table100[, above100 := specify_decimal(100-table100$above100, 2)]
 
 pdt[cnt>100, cnt := 100]
 pdt[cnt_home>100, cnt_home := 100]
@@ -87,11 +103,13 @@ pdt[cnt_others>100, cnt_others := 100]
   order[, order := 1:nrow(order)]
   
   table2 <- merge(table2, order[, .(country, order)])
+  table2 <- merge(table2, table100, by = c("country", "setting"))
+
   setorder(table2, setting, order)
   table2[, country := factor(country)]
   table2$country <- reorder(table2$country, table2$order)
   
-  table2 <- dcast(table2, setting ~ country, value.var = "ci")
+  table2 <- dcast(table2, setting ~ country, value.var = c("above100", "ci"))
   
 write.table(table2, "outputs/table2.csv", sep=",", row.names = FALSE)
 
